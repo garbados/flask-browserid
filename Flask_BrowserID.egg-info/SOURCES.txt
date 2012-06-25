@@ -1,0 +1,10 @@
+setup.py
+Flask_BrowserID.egg-info/PKG-INFO
+Flask_BrowserID.egg-info/SOURCES.txt
+Flask_BrowserID.egg-info/dependency_links.txt
+Flask_BrowserID.egg-info/namespace_packages.txt
+Flask_BrowserID.egg-info/not-zip-safe
+Flask_BrowserID.egg-info/requires.txt
+Flask_BrowserID.egg-info/top_level.txt
+flaskext/__init__.py
+flaskext/browserid/__init__.py
