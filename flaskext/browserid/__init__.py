@@ -10,6 +10,9 @@ class BrowserID(object):
 
         self.views.before_app_request(self._load_auth_script)
 
+        self.login_callback = None
+        self.logout_callback = None
+
         if app:
             self.init_app(app)
 
@@ -17,8 +20,11 @@ class BrowserID(object):
         self.login_url = app.config.get('BROWSERID_LOGIN_URL', '/api/login')
         self.logout_url = app.config.get('BROWSERID_LOGOUT_URL', '/api/logout')
 
-        if not hasattr(self, 'login_callback') and hasattr(app, 'login_manager'):
-            self.login_callback = app.login_manager.user_callback
+        if not self.login_callback:
+            if app.config.get('BROWSERID_LOGIN_CALLBACK'):
+                self.user_loader = app.config['BROWSERID_LOGIN_CALLBACK']
+            else:
+                raise Exception("No method for finding users. a `login_callback` method is required.")
 
         with self.views.open_resource('static/auth.js') as f:
             self.auth_script = jinja2.Template(f.read()).render(
@@ -36,19 +42,18 @@ class BrowserID(object):
 
         app.register_blueprint(self.views)
 
-    def set_login_callback(self, func):
+    def user_loader(self, func):
         """
-        Registers a function that, given the response from the BrowserID servers,
+        Registers a function that, given the response from the BrowserID servers, 
         either returns a user, if login is successful, or None, if it isn't.
         """
         self.login_callback = func
 
-    def set_logout_callback(self, func=None):
+    def logout_callback(self, func):
         """
-        An optional callback to perform after logout.
+        An optional function that runs after the user has logged out.
         """
-        if func:
-            self.logout_callback = func
+        self.logout_callback = func
 
     def _load_auth_script(self):
         flask._request_ctx_stack.top.auth_script = self.auth_script
@@ -60,7 +65,7 @@ class BrowserID(object):
         response = requests.post('https://browserid.org/verify', data=payload)
         if response.status_code == 200:
             user_data = json.loads(response.text)
-            user = self.login_callback(user_data)
+            user = self.user_loader(user_data)
             if user:
                 login_user(user)
                 return ''
@@ -71,7 +76,7 @@ class BrowserID(object):
             return flask.make_response(response.text, response.status_code)
 
     def _logout(self):
-        if hasattr(self,'logout_callback'):
+        if self.logout_callback:
             self.logout_callback()
         logout_user()
         return ''

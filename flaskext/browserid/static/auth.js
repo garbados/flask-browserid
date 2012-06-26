@@ -32,11 +32,11 @@ $(function() {
     return false;
   };
   return $(function() {
-    $('#browserid').click(function() {
+    $('#browserid-login').click(function() {
       navigator.id.get(gotAssertion);
       return false;
     });
-    $('#logout').click(function() {
+    $('#browserid-logout').click(function() {
       navigator.id.logout(logoutCallback);
       return false;
     });

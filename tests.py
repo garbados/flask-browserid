@@ -13,9 +13,16 @@ USERS = (
     User(email="test2@est.test", id=2)
     )
 
-def get_user(id):
+def get_user_by_id(id):
     for user in USERS:
         if user.id == id:
+            return user
+    else:
+        return None
+
+def get_user(kwargs):
+    for user in USERS:
+        if user.email == kwargs.get('email') or user.id == kwargs.get('id'):
             return user
     else:
         return None
@@ -30,9 +37,11 @@ class BasicAppTestCase(unittest.TestCase):
         app.config['TESTING'] = True
 
         login_manager = LoginManager()
-        login_manager.user_callback = get_user
-        browserid = BrowserID()
+        login_manager.user_loader(get_user_by_id)
         login_manager.init_app(app)
+
+        browserid = BrowserID()
+        browserid.user_loader(get_user)
         browserid.init_app(app)
 
         self.app = app

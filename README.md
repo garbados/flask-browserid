@@ -1,0 +1,75 @@
+# Flask-BrowserID
+
+A Flask extension that provides integration with Mozilla's [BrowserID]() authentication system and Flask-Login. It exposes two routes, for login and logout, and a javascript authentication bundle that allows you to quickly create login and logout buttons.
+
+# Installation
+
+Install with **pip**:
+
+    pip install git+https://github.com/garbados/flask-browserid.git
+
+# Quickstart
+
+Flask-BrowserID requires that Flask-Login's LoginManager be configured and registered with the app first, like so:
+
+    from flask import Flask
+    from flask.ext.login import LoginManager
+    from flask.ext.login import BrowserID
+    from my_stuff import get_user # finds a user based on data returned from BrowserID
+
+    app = Flask(__name__)
+    
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+
+    browser_id = BrowserID()
+    browser_id.user_loader(get_user)
+    browser_id.init_app(app)
+
+Now the routes `/api/login` and `/api/logout` have been registered with your app. A javascript bundle, `auth_script`, has also been added to the top level of your request context, so you can access it in templates like so:
+
+[Note: `auth_script` requires JQuery and Mozilla's `include.js`]
+
+    <html>
+        <head>
+            <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+            <script src="https://browserid.org/include.js" type="text/javascript"></script>
+            <script type="text/javascript">{{ auth_script }}</script>
+        </head>
+        <body>
+            <button id="browserid-login">Login</button>
+            <button id="browserid-logout">Logout</button>
+        </body>
+    </html>
+
+Thanks to `auth_script`, clicking the `Login` button on that page will attempt to log you in using BrowserID. If you're already logged in, then clicking `Logout` will log you out.
+
+# Required Configuration
+
+Flask-BrowserID requires a function that takes the data returned by BrowserID and uses it to find and return a user, which Flask-BrowserID then logs in using Flask-Login. If the function can't find a user, it should return None. The data returned by BrowserID will look something like this if successful:
+
+    {
+        "status": "okay",
+        "email": "lloyd@example.com",
+        "audience": "https://mysite.com",
+        "expires": 1308859352261,
+        "issuer": "browserid.org"
+    }
+
+Or this, if not:
+
+    {
+        "status": "failure",
+        "reason": "no certificate provided"
+    }
+
+BrowserID's response will have already been parsed from JSON into a dict by the time it reaches your `user_loader` function.
+
+# Optional Configuration
+
+You can set the URLs Flask-BrowserID uses for login and logout by setting the following in your application's configuration:
+
+* `BROWSERID_LOGIN_URL`: defaults to `/api/login`
+* `BROWSERID_LOGOUT_URL`: defaults to `/api/logout`
+
+See [Flask Configuration Handling](http://flask.pocoo.org/docs/config/) for more on how to configure your application.
