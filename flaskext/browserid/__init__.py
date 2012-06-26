@@ -5,28 +5,50 @@ import json
 import jinja2
 
 class BrowserID(object):
-    def __init__(self, app=None, **kwargs):
+    def __init__(self, app=None):
         self.views = flask.Blueprint('browserid', __name__, static_folder="static")
-        self.login_url = kwargs['login_url'] if kwargs.has_key('login_url') else '/api/login'
-        self.login_callback = kwargs['login_callback'] if kwargs.has_key('login_callback') else None
-        self.logout_url = kwargs['logout_url'] if kwargs.has_key('logout_url') else '/api/logout'
-        self.logout_callback = kwargs['logout_callback'] if kwargs.has_key('logout_callback') else None
 
-        self.views.add_url_rule(login_url, 'login', self._login)
-        self.views.add_url_rule(logout_url, 'logout', self._logout)
-
-        with views.open_resource('static/auth.js') as f:
-            self.auth_script = jinja2.Template(f.read()).render(
-                                    login_url=login_url, 
-                                    logout_url=logout_url)
-
-        views.before_app_request(self._load_auth_script)
+        self.views.before_app_request(self._load_auth_script)
 
         if app:
-            app.register_blueprint(self.views)
+            self.init_app(app)
 
-    def init_app(app, **kwargs):
-        super(BrowserID, self).__init__(app, **kwargs)
+    def init_app(self, app):
+        self.login_url = app.config.get('BROWSERID_LOGIN_URL', '/api/login')
+        self.logout_url = app.config.get('BROWSERID_LOGOUT_URL', '/api/logout')
+
+        if not hasattr(self, 'login_callback') and hasattr(app, 'login_manager'):
+            self.login_callback = app.login_manager.user_callback
+
+        with self.views.open_resource('static/auth.js') as f:
+            self.auth_script = jinja2.Template(f.read()).render(
+                                    login_url=self.login_url, 
+                                    logout_url=self.logout_url)
+
+        self.views.add_url_rule(self.login_url, 
+                                'login', 
+                                self._login, 
+                                methods=['POST'])
+        self.views.add_url_rule(self.logout_url, 
+                                'logout', 
+                                self._logout, 
+                                methods=['POST'])
+
+        app.register_blueprint(self.views)
+
+    def set_login_callback(self, func):
+        """
+        Registers a function that, given the response from the BrowserID servers,
+        either returns a user, if login is successful, or None, if it isn't.
+        """
+        self.login_callback = func
+
+    def set_logout_callback(self, func=None):
+        """
+        An optional callback to perform after logout.
+        """
+        if func:
+            self.logout_callback = func
 
     def _load_auth_script(self):
         flask._request_ctx_stack.top.auth_script = self.auth_script
@@ -38,15 +60,18 @@ class BrowserID(object):
         response = requests.post('https://browserid.org/verify', data=payload)
         if response.status_code == 200:
             user_data = json.loads(response.text)
-            if self.login_callback:
-                self.login_callback(user_data)
-            login_user(user)
-            return ''
+            user = self.login_callback(user_data)
+            if user:
+                login_user(user)
+                return ''
+            else:
+                if user_data.get('status') == "failure":
+                    return flask.make_response(user_data['reason'], 400)
         else:
             return flask.make_response(response.text, response.status_code)
 
     def _logout(self):
-        if self.logout_callback:
+        if hasattr(self,'logout_callback'):
             self.logout_callback()
         logout_user()
         return ''
