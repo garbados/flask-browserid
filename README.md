@@ -15,11 +15,13 @@ Flask-BrowserID requires that Flask-Login's LoginManager be configured and regis
     from flask import Flask
     from flask.ext.login import LoginManager
     from flask.ext.login import BrowserID
-    from my_stuff import get_user # finds a user based on data returned from BrowserID
+    from my_stuff import get_user_by_id # finds a user by their id
+    from other_stuff import get_user # finds a user based on BrowserID response
 
     app = Flask(__name__)
     
     login_manager = LoginManager()
+    login_manager.user_loader(get_user_by_id)
     login_manager.init_app(app)
 
     browser_id = BrowserID()
@@ -73,3 +75,7 @@ You can set the URLs Flask-BrowserID uses for login and logout by setting the fo
 * `BROWSERID_LOGOUT_URL`: defaults to `/api/logout`
 
 See [Flask Configuration Handling](http://flask.pocoo.org/docs/config/) for more on how to configure your application.
+
+# Credits
+
+Many thanks to [Flask-Mongoengine](), who I based the structure of this extension on, and to [Flask-Login](), for generally being a pretty sweet extension.
