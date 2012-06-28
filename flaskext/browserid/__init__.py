@@ -59,9 +59,10 @@ class BrowserID(object):
         flask._request_ctx_stack.top.auth_script = self.auth_script
 
     def _login(self):
+        from IPython import embed; embed()
         payload = dict(
             assertion = flask.request.form['assertion'],
-            audience = "http://localhost:5000")
+            audience = flask.request.url_root)
         response = requests.post('https://browserid.org/verify', data=payload)
         if response.status_code == 200:
             user_data = json.loads(response.text)
