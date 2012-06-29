@@ -5,7 +5,7 @@ $(function() {
     if (assertion) {
       return $.ajax({
         type: 'POST',
-        url: {{ login_url }},
+        url: '{{ login_url }}',
         data: {
           assertion: assertion
         },
@@ -21,7 +21,7 @@ $(function() {
   logoutCallback = function(event) {
     $.ajax({
       type: 'POST',
-      url: {{ logout_url }},
+      url: '{{ logout_url }}',
       success: function() {
         return location.reload(true);
       },

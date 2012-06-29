@@ -4,11 +4,14 @@ import flask
 import json
 import jinja2
 
+try:
+    from flask import _app_ctx_stack as stack
+except ImportError:
+    from flask import _request_ctx_stack as stack
+
 class BrowserID(object):
     def __init__(self, app=None):
         self.views = flask.Blueprint('browserid', __name__, static_folder="static")
-
-        self.views.before_app_request(self._load_auth_script)
 
         self.login_callback = None
         self.logout_callback = None
@@ -27,9 +30,14 @@ class BrowserID(object):
                 raise Exception("No method for finding users. a `login_callback` method is required.")
 
         with self.views.open_resource('static/auth.js') as f:
-            self.auth_script = jinja2.Template(f.read()).render(
-                                    login_url=self.login_url, 
-                                    logout_url=self.logout_url)
+            self.auth_script = jinja2.Template(
+                                        f.read(),
+                                        autoescape=False
+                                    ).render(
+                                        login_url=self.login_url, 
+                                        logout_url=self.logout_url
+                                    )
+            self.views.app_context_processor(self.load_auth_script)
 
         self.views.add_url_rule(self.login_url, 
                                 'login', 
@@ -41,6 +49,7 @@ class BrowserID(object):
                                 methods=['POST'])
 
         app.register_blueprint(self.views)
+        app.browserid = self
 
     def user_loader(self, func):
         """
@@ -55,8 +64,8 @@ class BrowserID(object):
         """
         self.logout_callback = func
 
-    def _load_auth_script(self):
-        flask._request_ctx_stack.top.auth_script = self.auth_script
+    def load_auth_script(self):
+        return dict(auth_script=self.auth_script)
 
     def _login(self):
         payload = dict(

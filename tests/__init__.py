@@ -70,9 +70,8 @@ class BasicAppTestCase(unittest.TestCase):
 
     def test_static_file(self):
         # todo: test that "auth.js" is compiled and 
-        # available in the request context
-        request = flask.request
-        from IPython import embed; embed()
+        # available in the request contexts
+        pass
 
 def test_main():
     test_support.run_unittest(BasicAppTestCase)
