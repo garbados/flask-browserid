@@ -59,7 +59,6 @@ class BrowserID(object):
         flask._request_ctx_stack.top.auth_script = self.auth_script
 
     def _login(self):
-        from IPython import embed; embed()
         payload = dict(
             assertion = flask.request.form['assertion'],
             audience = flask.request.url_root)

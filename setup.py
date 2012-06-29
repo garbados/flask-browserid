@@ -24,7 +24,8 @@ setup(
     description='Flask support for BrowserID authentication',
     long_description=__doc__,
     packages=['flaskext',
-              'flaskext.browserid'],
+              'flaskext.browserid',
+              ],
     namespace_packages=['flaskext'],
     test_suite='nose.collector',
     zip_safe=False,
@@ -32,7 +33,7 @@ setup(
     install_requires=[
         'Flask',
         'flask-login',
-        'requests'
+        'requests',
     ],
     include_package_data=True,
     tests_require=[

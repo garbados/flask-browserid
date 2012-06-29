@@ -1,0 +1,2 @@
+include AUTHORS.md LICENSE.md README.md
+recursive-include flaskext/browserid/static *.js

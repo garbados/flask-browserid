@@ -2,6 +2,8 @@ import unittest
 import flask
 from flask.ext.login import LoginManager, UserMixin
 from flaskext.browserid import BrowserID
+import sys
+from test import test_support
 
 class User(UserMixin):
     def __init__(self, **kwargs):
@@ -27,24 +29,28 @@ def get_user(kwargs):
     else:
         return None
 
+
+app = flask.Flask(__name__)
+
+app.config['BROWSERID_LOGIN_URL'] = login_url = "/login"
+app.config['BROWSERID_LOGOUT_URL'] = logout_url = "/logout"
+app.config['SECRET_KEY'] = "deterministic"
+app.config['TESTING'] = True
+
+login_manager = LoginManager()
+login_manager.user_loader(get_user_by_id)
+login_manager.init_app(app)
+
+browserid = BrowserID()
+browserid.user_loader(get_user)
+browserid.init_app(app)
+
+@app.route('/')
+def index():
+    return flask.render_template('index.html')
+
 class BasicAppTestCase(unittest.TestCase):
     def setUp(self):
-        app = flask.Flask(__name__)
-
-        app.config['BROWSERID_LOGIN_URL'] = login_url = "/login"
-        app.config['BROWSERID_LOGOUT_URL'] = logout_url = "/logout"
-        app.config['SECRET_KEY'] = "deterministic"
-        app.config['TESTING'] = True
-
-        login_manager = LoginManager()
-        login_manager.user_loader(get_user_by_id)
-        login_manager.init_app(app)
-
-        browserid = BrowserID()
-        browserid.user_loader(get_user)
-        browserid.init_app(app)
-
-        self.app = app
         self.client = app.test_client()
         self.login_manager = login_manager
         self.browserid = browserid
@@ -65,7 +71,14 @@ class BasicAppTestCase(unittest.TestCase):
     def test_static_file(self):
         # todo: test that "auth.js" is compiled and 
         # available in the request context
-        pass
+        request = flask.request
+        from IPython import embed; embed()
+
+def test_main():
+    test_support.run_unittest(BasicAppTestCase)
 
 if __name__ == '__main__':
-    unittest.main()
+    if len(sys.argv) > 1 and sys.argv[1] == '-i':
+        app.run()
+    else:
+        unittest.main()
