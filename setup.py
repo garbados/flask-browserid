@@ -22,12 +22,11 @@ setup(
     author='Max Thayer',
     author_email='garbados@gmail.com',
     description='Flask support for BrowserID authentication',
-    long_description=__doc__,
+    long_description=file.read(open('README.md', 'r')),
     packages=['flaskext',
               'flaskext.browserid',
               ],
     namespace_packages=['flaskext'],
-    test_suite='nose.collector',
     zip_safe=False,
     platforms='any',
     install_requires=[
@@ -37,8 +36,9 @@ setup(
     ],
     include_package_data=True,
     tests_require=[
-        'nose',
+        'nose==1.0.0',
     ],
+    test_suite='nose.collector',
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',

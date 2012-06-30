@@ -26,6 +26,7 @@ $(function() {
         return location.reload(true);
       },
       error: function(res, status, xhr) {
+        console.log(res);
         return alert("logout failure: " + status);
       }
     });

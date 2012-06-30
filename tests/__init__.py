@@ -3,17 +3,16 @@ import flask
 from flask.ext.login import LoginManager, UserMixin
 from flaskext.browserid import BrowserID
 import sys
-from test import test_support
 
 class User(UserMixin):
     def __init__(self, **kwargs):
         self.id = kwargs.get('id')
         self.email = kwargs.get('email')
 
-USERS = (
+USERS = [
     User(email="test@test.test", id=1),
-    User(email="test2@est.test", id=2)
-    )
+    User(email="test2@est.test", id=2),
+    ]
 
 def get_user_by_id(id):
     for user in USERS:
@@ -22,13 +21,25 @@ def get_user_by_id(id):
     else:
         return None
 
-def get_user(kwargs):
-    for user in USERS:
-        if user.email == kwargs.get('email') or user.id == kwargs.get('id'):
-            return user
+def create_browserid_user(kwargs):
+    """
+    takes browserid response and creates a user.
+    """
+    if kwargs['status'] == 'okay':
+        id = max([user.id for user in USERS]) + 1
+        user = User(email = kwargs['email'], id = id)
+        USERS.append(user)
+        return user
     else:
         return None
 
+def get_user(kwargs):
+    # try to find the user
+    for user in USERS:
+        if user.email == kwargs.get('email') or user.id == kwargs.get('id'):
+            return user
+    # try to create the user
+    return create_browserid_user(kwargs)
 
 app = flask.Flask(__name__)
 
@@ -72,9 +83,6 @@ class BasicAppTestCase(unittest.TestCase):
         # todo: test that "auth.js" is compiled and 
         # available in the request contexts
         pass
-
-def test_main():
-    test_support.run_unittest(BasicAppTestCase)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == '-i':

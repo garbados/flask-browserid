@@ -48,7 +48,7 @@ Thanks to `auth_script`, clicking the `Login` button on that page will attempt t
 
 # Required Configuration
 
-Flask-BrowserID requires a function that takes the data returned by BrowserID and uses it to find and return a user, which Flask-BrowserID then logs in using Flask-Login. If the function can't find a user, it should return None. The data returned by BrowserID will look something like this if successful:
+Flask-BrowserID requires a function that takes the data returned by BrowserID and uses it to find and return a user, which Flask-BrowserID then logs in using Flask-Login. If the function can't find a user, it can attempt to create a user using the data given. If a user could neither be found nor created, the function should return None. The data returned by BrowserID will look something like this if successful:
 
     {
         "status": "okay",
