@@ -16,7 +16,7 @@ USERS = [
 
 def get_user_by_id(id):
     for user in USERS:
-        if user.id == id:
+        if unicode(user.id) == id:
             return user
     else:
         return None
@@ -29,6 +29,7 @@ def create_browserid_user(kwargs):
         id = max([user.id for user in USERS]) + 1
         user = User(email = kwargs['email'], id = id)
         USERS.append(user)
+        print USERS
         return user
     else:
         return None
@@ -40,41 +41,47 @@ def get_user(kwargs):
             return user
     # try to create the user
     return create_browserid_user(kwargs)
-
-app = flask.Flask(__name__)
-
-app.config['BROWSERID_LOGIN_URL'] = login_url = "/login"
-app.config['BROWSERID_LOGOUT_URL'] = logout_url = "/logout"
-app.config['SECRET_KEY'] = "deterministic"
-app.config['TESTING'] = True
-
-login_manager = LoginManager()
-login_manager.user_loader(get_user_by_id)
-login_manager.init_app(app)
-
-browserid = BrowserID()
-browserid.user_loader(get_user)
-browserid.init_app(app)
-
-@app.route('/')
+    
 def index():
     return flask.render_template('index.html')
 
+def generate_app():
+    app = flask.Flask(__name__)
+
+    app.config['BROWSERID_LOGIN_URL'] = "/login"
+    app.config['BROWSERID_LOGOUT_URL'] = "/logout"
+    app.config['SECRET_KEY'] = "deterministic"
+    app.config['TESTING'] = True
+
+    login_manager = LoginManager()
+    login_manager.user_loader(get_user_by_id)
+    login_manager.init_app(app)
+
+    browserid = BrowserID()
+    browserid.user_loader(get_user)
+    browserid.init_app(app)
+    
+    app.route('/')(index)
+    
+    return app
+
 class BasicAppTestCase(unittest.TestCase):
     def setUp(self):
-        self.client = app.test_client()
-        self.login_manager = login_manager
-        self.browserid = browserid
-        self.login_url = login_url
-        self.logout_url = logout_url
+        self.app = generate_app()
+        self.client = self.app.test_client()
+        self.login_manager = self.app.login_manager
+        self.browserid = self.app.browserid
+        self.login_url = self.app.config['BROWSERID_LOGIN_URL']
+        self.logout_url = self.app.config['BROWSERID_LOGOUT_URL']
 
     def test_login(self):
         # bad login
         res = self.client.post(self.login_url, data={'assertion' : 'ducks'})
-        assert res.status_code == 400
+        assert res.status_code == 500
         # todo: good login
 
     def test_logout(self):
+        # todo: log user in, test that user is actually logged out
         # good logout
         res = self.client.post(self.logout_url)
         assert res.status_code == 200
@@ -83,9 +90,16 @@ class BasicAppTestCase(unittest.TestCase):
         # todo: test that "auth.js" is compiled and 
         # available in the request contexts
         pass
+        
+    def test_multiple_applications(self):
+        """
+        ensures that the extension supports multiple applications.
+        """
+        new_app = generate_app()
+        assert self.app != new_app
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == '-i':
-        app.run()
+        generate_app().run()
     else:
         unittest.main()

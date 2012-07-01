@@ -36,7 +36,7 @@ setup(
     ],
     include_package_data=True,
     tests_require=[
-        'nose==1.0.0',
+        'nose',
     ],
     test_suite='nose.collector',
     classifiers=[
