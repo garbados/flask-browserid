@@ -76,6 +76,10 @@ You can set the URLs Flask-BrowserID uses for login and logout by setting the fo
 
 See [Flask Configuration Handling](http://flask.pocoo.org/docs/config/) for more on how to configure your application.
 
+# Testing
+
+Running `python setup.py test` will run the extension's automated test suite, but some tests can only be run (presently) by manually starting up the server and clicking around. To do so, from the extension's root directory, run `python tests/__init__.py -i`. The `-i` flag tells the test suite to skip normal testing and instead run the testing application with a test template so you can click around.
+
 # Credits
 
 Many thanks to [Flask-Mongoengine](), who I based the structure of this extension on, and to [Flask-Login](), for generally being a pretty sweet extension.
