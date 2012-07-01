@@ -29,7 +29,6 @@ def create_browserid_user(kwargs):
         id = max([user.id for user in USERS]) + 1
         user = User(email = kwargs['email'], id = id)
         USERS.append(user)
-        print USERS
         return user
     else:
         return None
