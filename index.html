@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Flask-BrowserID by garbados</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Flask-BrowserID</h1>
+          <h2>Flask support for BrowserID authentication, using Flask-Login</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/garbados/flask-browserid/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/garbados/flask-browserid/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/garbados/flask-browserid" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>Flask-BrowserID</h1>
+
+<p>A Flask extension that provides integration with Mozilla's <a href="">BrowserID</a> authentication system and Flask-Login. It exposes two routes, for login and logout, and a javascript authentication bundle that allows you to quickly create login and logout buttons.</p>
+
+<h1>Installation</h1>
+
+<p>Install with <strong>pip</strong>:</p>
+
+<pre><code>pip install git+https://github.com/garbados/flask-browserid.git
+</code></pre>
+
+<h1>Quickstart</h1>
+
+<p>Flask-BrowserID requires that Flask-Login's LoginManager be configured and registered with the app first, like so:</p>
+
+<pre><code>from flask import Flask
+from flask.ext.login import LoginManager
+from flask.ext.login import BrowserID
+from my_stuff import get_user_by_id # finds a user by their id
+from other_stuff import get_user # finds a user based on BrowserID response
+
+app = Flask(__name__)
+
+login_manager = LoginManager()
+login_manager.user_loader(get_user_by_id)
+login_manager.init_app(app)
+
+browser_id = BrowserID()
+browser_id.user_loader(get_user)
+browser_id.init_app(app)
+</code></pre>
+
+<p>Now the routes <code>/api/login</code> and <code>/api/logout</code> have been registered with your app. A javascript bundle, <code>auth_script</code>, has also been added to the top level of your request context, so you can access it in templates like so:</p>
+
+<p>[Note: <code>auth_script</code> requires JQuery and Mozilla's <code>include.js</code>]</p>
+
+<pre><code>&lt;html&gt;
+    &lt;head&gt;
+        &lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"&gt;&lt;/script&gt;
+        &lt;script src="https://browserid.org/include.js" type="text/javascript"&gt;&lt;/script&gt;
+        &lt;script type="text/javascript"&gt;{{ auth_script|safe }}&lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;button id="browserid-login"&gt;Login&lt;/button&gt;
+        &lt;button id="browserid-logout"&gt;Logout&lt;/button&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>Thanks to <code>auth_script</code>, clicking the <code>Login</code> button on that page will attempt to log you in using BrowserID. If you're already logged in, then clicking <code>Logout</code> will log you out.</p>
+
+<h1>Required Configuration</h1>
+
+<p>Flask-BrowserID requires a function that takes the data returned by BrowserID and uses it to find and return a user, which Flask-BrowserID then logs in using Flask-Login. If the function can't find a user, it can attempt to create a user using the data given. If a user could neither be found nor created, the function should return None. The data returned by BrowserID will look something like this if successful:</p>
+
+<pre><code>{
+    "status": "okay",
+    "email": "lloyd@example.com",
+    "audience": "https://mysite.com",
+    "expires": 1308859352261,
+    "issuer": "browserid.org"
+}
+</code></pre>
+
+<p>Or this, if not:</p>
+
+<pre><code>{
+    "status": "failure",
+    "reason": "no certificate provided"
+}
+</code></pre>
+
+<p>BrowserID's response will have already been parsed from JSON into a dict by the time it reaches your <code>user_loader</code> function.</p>
+
+<h1>Optional Configuration</h1>
+
+<p>You can set the URLs Flask-BrowserID uses for login and logout by setting the following in your application's configuration:</p>
+
+<ul>
+<li>
+<code>BROWSERID_LOGIN_URL</code>: defaults to <code>/api/login</code>
+</li>
+<li>
+<code>BROWSERID_LOGOUT_URL</code>: defaults to <code>/api/logout</code>
+</li>
+</ul><p>See <a href="http://flask.pocoo.org/docs/config/">Flask Configuration Handling</a> for more on how to configure your application.</p>
+
+<h1>Credits</h1>
+
+<p>Many thanks to <a href="">Flask-Mongoengine</a>, who I based the structure of this extension on, and to <a href="">Flask-Login</a>, for generally being a pretty sweet extension.</p>
+        </section>
+
+        <footer>
+          Flask-BrowserID is maintained by <a href="https://github.com/garbados">garbados</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
