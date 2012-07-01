@@ -39,8 +39,11 @@ Now the routes `/api/login` and `/api/logout` have been registered with your app
             <script type="text/javascript">{{ auth_script|safe }}</script>
         </head>
         <body>
-            <button id="browserid-login">Login</button>
-            <button id="browserid-logout">Logout</button>
+            {% if current_user.is_authenticated() %}
+                <button id="browserid-logout">Logout</button>
+            {% else %}        
+                <button id="browserid-login">Login</button>
+            {% endif %}
         </body>
     </html>
 
