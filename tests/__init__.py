@@ -87,7 +87,6 @@ def test_login(app):
     client = app.test_client()
     # bad login
     res = client.post(app.config['BROWSERID_LOGIN_URL'], data={'assertion' : 'ducks'})
-    print res.status_code
     assert res.status_code == 500
     # todo: good login
 
