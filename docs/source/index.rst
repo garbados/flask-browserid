@@ -43,7 +43,7 @@ Now the routes `/api/login` and `/api/logout` have been registered with your app
         <head>
             <!-- auth_script requires jquery and Mozilla's 'include.js' shim -->
             <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-            <script src="https://browserid.org/include.js" type="text/javascript"></script>
+            <script src="https://login.persona.org/include.js" type="text/javascript"></script>
             <script type="text/javascript">{{ auth_script|safe }}</script>
         </head>
         <body>
