@@ -4,8 +4,6 @@ import flask
 import json
 import jinja2
 
-from .cors import cors
-
 
 try:
     from flask import _app_ctx_stack as stack
@@ -44,18 +42,13 @@ class BrowserID(object):
                                     )
             self.views.app_context_processor(self.load_auth_script)
 
-        if 'CORS_CLIENT_DOMAIN' in app.config:
-            corser = cors(origin_getter=self.get_client_origin)
-        else:
-            corser = lambda x: x
-
         self.views.add_url_rule(self.login_url,
                                 'login',
-                                corser(self._login),
+                                self._login,
                                 methods=['POST'])
         self.views.add_url_rule(self.logout_url,
                                 'logout',
-                                corser(self._logout),
+                                self._logout,
                                 methods=['POST'])
 
         app.register_blueprint(self.views)
