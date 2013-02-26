@@ -4,10 +4,14 @@ import flask
 import json
 import jinja2
 
+from .cors import cors
+
+
 try:
     from flask import _app_ctx_stack as stack
 except ImportError:
     from flask import _request_ctx_stack as stack
+
 
 class BrowserID(object):
     def __init__(self, app=None):
@@ -40,13 +44,18 @@ class BrowserID(object):
                                     )
             self.views.app_context_processor(self.load_auth_script)
 
+        if 'CORS_CLIENT_DOMAIN' in app.config:
+            corser = cors(origin_getter=self.get_client_origin)
+        else:
+            corser = lambda x: x
+
         self.views.add_url_rule(self.login_url,
                                 'login',
-                                self._login,
+                                corser(self._login),
                                 methods=['POST'])
         self.views.add_url_rule(self.logout_url,
                                 'logout',
-                                self._logout,
+                                corser(self._logout),
                                 methods=['POST'])
 
         app.register_blueprint(self.views)
@@ -68,9 +77,9 @@ class BrowserID(object):
     def load_auth_script(self):
         return dict(auth_script=self.auth_script)
 
-    def get_client_url(self):
+    def get_client_origin(self):
         if self.client_domain:
-            # Build the client_url
+            # Build the client_origin
             end_scheme = flask.request.url_root.find('://') + 3
             client_scheme = flask.request.url_root[:end_scheme]
             return client_scheme + self.client_domain
@@ -80,7 +89,7 @@ class BrowserID(object):
     def _login(self):
         payload = dict(
             assertion = flask.request.form['assertion'],
-            audience = self.get_client_url())
+            audience = self.get_client_origin())
         response = requests.post('https://verifier.login.persona.org/verify', data=payload)
         if response.status_code == 200:
             user_data = json.loads(response.text)
