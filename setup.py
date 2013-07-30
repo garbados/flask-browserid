@@ -35,11 +35,7 @@ setup(
         'requests',
     ],
     include_package_data=True,
-    tests_require=[
-        'Attest',
-    ],
-    test_loader='attest:auto_reporter.test_loader',
-    test_suite='tests.flask_browserid',
+    test_suite='tests',
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',

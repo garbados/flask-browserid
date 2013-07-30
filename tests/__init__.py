@@ -2,10 +2,7 @@ import flask
 from flask.ext.login import LoginManager, UserMixin
 from flaskext.browserid import BrowserID
 import sys
-from attest import Tests, assert_hook
-
-## ATTEST
-flask_browserid = Tests()
+import unittest
 
 ## SETUP
 class User(UserMixin):
@@ -78,43 +75,42 @@ def generate_app():
 
     return app
 
-@flask_browserid.context
-def app_context():
-    yield generate_app()
+class Tests(unittest.TestCase):
+    def setUp(self):
+        self.app = generate_app()
 
-@flask_browserid.test
-def test_login(app):
-    client = app.test_client()
-    # bad login
-    res = client.post(app.config['BROWSERID_LOGIN_URL'], data={'assertion' : 'ducks'})
-    assert res.status_code == 500
-    # todo: good login
+    def test_login(self):
+        app = self.app
+        client = app.test_client()
+        # bad login
+        res = client.post(app.config['BROWSERID_LOGIN_URL'], data={'assertion' : 'ducks'})
+        assert res.status_code == 500
+        # todo: good login
 
-@flask_browserid.test
-def test_logout(app):
-    client = app.test_client()
-    # todo: log user in, test that user is actually logged out
-    # good logout
-    res = client.post(app.config['BROWSERID_LOGOUT_URL'])
-    assert res.status_code == 200
+    def test_logout(self):
+        app = self.app
+        client = app.test_client()
+        # todo: log user in, test that user is actually logged out
+        # good logout
+        res = client.post(app.config['BROWSERID_LOGOUT_URL'])
+        assert res.status_code == 200
 
-@flask_browserid.test
-def test_static_file(app):
-    # todo: test that "auth.js" is compiled and 
-    # available in the request contexts
-    pass
 
-@flask_browserid.test
-def test_multiple_applications(self):
-    """
-    ensures that the extension supports multiple applications.
-    """
-    # todo: figure out how to test no conflict 
-    # between multiple applications.
-    pass
+    def test_static_file(self):
+        # todo: test that "auth.js" is compiled and 
+        # available in the request contexts
+        pass
+
+    def test_multiple_applications(self):
+        """
+        ensures that the extension supports multiple applications.
+        """
+        # todo: figure out how to test no conflict 
+        # between multiple applications.
+        pass
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == '-i':
         generate_app().run()
     else:
-        flask_browserid.main()
+        unittest.main()
