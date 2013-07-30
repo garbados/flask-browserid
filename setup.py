@@ -16,13 +16,13 @@ from setuptools import setup
 
 setup(
     name='Flask-BrowserID',
-    version='0.0.1',
+    version='0.0.2',
     url='https://github.com/garbados/flask-browserid',
     license='MIT',
     author='Max Thayer',
     author_email='garbados@gmail.com',
     description='Flask support for BrowserID authentication',
-    long_description=file.read(open('README.md', 'r')),
+    long_description=open('README.md', 'r').read(),
     packages=['flaskext',
               'flaskext.browserid',
               ],
