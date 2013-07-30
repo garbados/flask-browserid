@@ -85,4 +85,4 @@ Running `python setup.py test` will run the extension's automated test suite, bu
 
 # Credits
 
-Many thanks to [Flask-Mongoengine](), who I based the structure of this extension on, and to [Flask-Login](), for generally being a pretty sweet extension.
+Many thanks to [Flask-Mongoengine](https://github.com/MongoEngine/flask-mongoengine), who I based the structure of this extension on, and to [Flask-Login](https://flask-login.readthedocs.org/en/latest/), for generally being a pretty sweet extension.

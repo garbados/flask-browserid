@@ -16,7 +16,7 @@ from setuptools import setup
 
 setup(
     name='Flask-BrowserID',
-    version='0.0.3',
+    version='0.0.4',
     url='https://github.com/garbados/flask-browserid',
     license='MIT',
     author='Max Thayer',
