@@ -32,7 +32,7 @@ class BrowserID(object):
             else:
                 raise Exception("No method for finding users. a `login_callback` method is required.")
 
-        with self.views.open_resource('static/auth.js') as f:
+        with self.views.open_resource('static/auth.js', 'r') as f:
             self.auth_script = jinja2.Template(
                                         f.read(),
                                         autoescape=False
