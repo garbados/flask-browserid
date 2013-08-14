@@ -83,7 +83,7 @@ class BrowserID(object):
         payload = dict(
             assertion = flask.request.form['assertion'],
             audience = self.get_client_origin())
-        response = requests.post('https://verifier.login.persona.org/verify', data=payload)
+        response = requests.post('https://verifier.login.persona.org/verify', data=payload, verify=True)
         if response.status_code == 200:
             user_data = json.loads(response.text)
             user = self.login_callback(user_data)
