@@ -34,7 +34,7 @@ class BrowserID(object):
 
         with self.views.open_resource('static/auth.js', 'r') as f:
             self.auth_script = jinja2.Template(
-                                        f.read(),
+                                        f.read().decode('utf-8'),
                                         autoescape=False
                                     ).render(
                                         login_url=self.login_url,
