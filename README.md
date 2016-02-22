@@ -1,5 +1,7 @@
 # Flask-BrowserID
 
+**THIS PROJECT IS NO LONGER SUPPORTED. Go check out [flask/examples/persona](https://github.com/mitsuhiko/flask/tree/master/examples/persona) instead.**
+
 A Flask extension that provides integration with Mozilla's [BrowserID]() authentication system and Flask-Login. It exposes two routes, for login and logout, and a javascript authentication bundle that allows you to quickly create login and logout buttons.
 
 # Installation
